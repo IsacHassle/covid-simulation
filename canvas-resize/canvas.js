@@ -61,11 +61,14 @@ function resolveCollision(circle, otherCircle) {
 
 
 function infect(thisCircle, otherCircle){
-    if (thisCircle.infected === true && otherCircle.immune === false){
+    if (thisCircle.infected === true && otherCircle.immune === false && otherCircle.infected === false){
         otherCircle.infected = true;
+        otherCircle.willDieAt = new Date().getTime() + timeUntilDeath;
+   
     }
-    if (otherCircle.infected === true && thisCircle.immune === false){
+    if (otherCircle.infected === true && thisCircle.immune === false && thisCircle.infected === false){
         thisCircle.infected = true;
+        thisCircle.willDieAt = new Date().getTime() + timeUntilDeath;
     }
 }
 
@@ -88,6 +91,9 @@ function Circle(x, y, radius) {
     this.mass = 1;
     this.infected = (Math.random() >= 0.03 ? false : true);
     this.immune = (Math.random() >= 0.1 ? false : true);
+    this.willDieAt = (this.infected === true && this.immune === false) ? new Date().getTime() + timeUntilDeath : new Date().getTime() + 1000000000;
+    this.dead = false;
+    
     
 
     this.update = function(circleArray) {
@@ -95,6 +101,16 @@ function Circle(x, y, radius) {
 // Collide detection
         for (let i = 0; i < circleArray.length; i++) {
             if (this === circleArray[i]) continue;
+
+            if(this.willDieAt < new Date().getTime()){
+                this.dead = true;
+            }
+
+            if(this.dead){
+                this.velocity.x = 0;
+                this.velocity.y = 0;
+            }
+
             if (getDistance(this.x, this.y, circleArray[i].x, circleArray[i].y) - this.radius * 2 < 0){
                 
                 
@@ -154,8 +170,8 @@ function Circle(x, y, radius) {
     }
   };
     
-
-let circleAmount = 300;
+let timeUntilDeath = 10000;
+let circleAmount = 100;
 
 let circleArray = [];
 
