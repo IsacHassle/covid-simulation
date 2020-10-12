@@ -104,12 +104,23 @@ function Circle(x, y, radius) {
 
             if(this.willDieAt < new Date().getTime()){
                 this.dead = true;
+                console.log("dog");
             }
 
-            if(this.dead){
+            if(this.dead === true && Math.random() < 1){
+                this.immune === true;
+                this.infected === false;
+                console.log("immune");
+                // this.velocity.x = 0;
+                // this.velocity.y = 0;
+            }
+            else if(this.dead === true){
                 this.velocity.x = 0;
                 this.velocity.y = 0;
+                console.log("dead");
+
             }
+
 
             if (getDistance(this.x, this.y, circleArray[i].x, circleArray[i].y) - this.radius * 2 < 0){
                 
@@ -171,7 +182,7 @@ function Circle(x, y, radius) {
   };
     
 let timeUntilDeath = 10000;
-let circleAmount = 100;
+let circleAmount = 20;
 
 let circleArray = [];
 
