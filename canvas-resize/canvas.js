@@ -1,11 +1,10 @@
 let canvas = document.querySelector("canvas");
 
 
-canvas.width = window.innerWidth;   
+canvas.width = window.innerWidth / 2;
 canvas.height = window.innerHeight;
 
 let c = canvas.getContext("2d");
-
 
 
 function rotate(velocity, angle) {
@@ -16,7 +15,6 @@ function rotate(velocity, angle) {
 
     return rotatedVelocities;
 }
-console.log 
 
 
 function resolveCollision(circle, otherCircle) {
@@ -59,17 +57,6 @@ function resolveCollision(circle, otherCircle) {
 
 
 
-
-function infect(thisCircle, otherCircle){
-    if (thisCircle.infected === true && otherCircle.immune === false){
-        otherCircle.infected = true;
-    }
-    if (otherCircle.infected === true && thisCircle.immune === false){
-        thisCircle.infected = true;
-    }
-}
-
-
 function getDistance(x1, y1, x2, y2) {
     let xDistance = x2 - x1;
     let yDistance = y2 - y1;
@@ -86,102 +73,147 @@ function Circle(x, y, radius) {
     }
     this.radius = radius;
     this.mass = 1;
-    this.infected = (Math.random() >= 0.03 ? false : true);
-    this.immune = (Math.random() >= 0.1 ? false : true);
-    
+   if(Math.random() >= 0.03){
+        this.infected = false;
+        this.immune = (Math.random() >= 0.01 ? false : true);
+    } 
+    else{
+        this.infected = true;
+        this.immune = false;
+    }
+    let timeUntilDeath = Math.random() * 10000;
+   
+    this.willDieAt = (this.infected === true && this.immune === false) ? new Date().getTime() + timeUntilDeath : new Date().getTime() + 10000000000;
+    this.sick = false;
 
-    this.update = function(circleArray) {
+
+    function infect(thisCircle, otherCircle) {
+        if (thisCircle.infected === true && otherCircle.immune === false && otherCircle.infected === false) {
+            otherCircle.infected = true;
+            otherCircle.willDieAt = new Date().getTime() + timeUntilDeath;
+    
+        }
+        if (otherCircle.infected === true && thisCircle.immune === false && thisCircle.infected === false) {
+            thisCircle.infected = true;
+            thisCircle.willDieAt = new Date().getTime() + timeUntilDeath;
+        }
+    }
+
+    let deathRate = Math.random();
+    this.update = function (circleArray) {
         this.draw();
-// Collide detection
+        // Collide detection
         for (let i = 0; i < circleArray.length; i++) {
             if (this === circleArray[i]) continue;
-            if (getDistance(this.x, this.y, circleArray[i].x, circleArray[i].y) - this.radius * 2 < 0){
-                
-                
-                if (this.infected === true || circleArray[i].infected === true){
-                    infect(this,circleArray[i]);
+
+
+            if (getDistance(this.x, this.y, circleArray[i].x, circleArray[i].y) - this.radius * 2 < 0) {
+
+
+                if (this.infected === true || circleArray[i].infected === true) {
+                    infect(this, circleArray[i]);
 
                 }
-              
 
-                
+
+
                 resolveCollision(this, circleArray[i]);
-                
-
-             }
-// makes the circle change direction when in contact with wall
-            }
-            if (this.x + this.radius >= innerWidth || this.x - this.radius <= innerWidth - innerWidth) {
-                            this.velocity.x = -this.velocity.x;
-                        }
-                    
-            if (this.y + this.radius > innerHeight || this.y - this.radius < innerHeight - innerHeight) {
-                        this.velocity.y = -this.velocity.y;}
 
 
-            this.x += this.velocity.x;
-            this.y += this.velocity.y;
-        };
+            }
+            // makes the circle change direction when in contact with wall
+        }
+        if (this.x + this.radius >= canvas.width || this.x - this.radius <= canvas.width - canvas.width) {
+            this.velocity.x = -this.velocity.x;
+        }
+
+        if (this.y + this.radius > canvas.height || this.y - this.radius < canvas.height - canvas.height) {
+            this.velocity.y = -this.velocity.y;
+        }
 
 
+        this.x += this.velocity.x;
+        this.y += this.velocity.y;
 
-// draws the circle
-        this.draw = function() {
-            c.beginPath();
-            c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-           // changes the color based on if the circle is infected or not
-            if (this.infected === true){
-                c.strokeStyle = "red";
-            }
-            else if (this.immune === true){
-                c.strokeStyle = "yellow";
-            }
-            else {
-                c.strokeStyle = "blue";
-            }
-            
-            if (this.infected === true){
-                c.fillStyle = "red";
-            }
-            else if (this.immune === true){
-                c.fillStyle = "yellow";
-            }
-            else {
-                c.fillStyle = "blue";
-            }            
-            c.stroke();
-            c.fill();
+
+        if (this.willDieAt < new Date().getTime()) {
+            this.sick = true;
+        }
+        if (this.sick && deathRate < survivalRate) {
+            this.infected = false;
+            this.immune = true;
+        }
+        if (this.sick && deathRate > survivalRate) {
+            this.velocity.x = 0;
+            this.velocity.y = 0;
+            this.x = canvas.width + 100;
+            this.y = canvas.length + 100;
+        }
+
+        
+    };
+
+
+    // draws the circle
+    this.draw = function () {
+        c.beginPath();
+        c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        // changes the color based on if the circle is infected or not
+        if (this.infected === true) {
+            c.strokeStyle = "red";
+        }
+        else if (this.immune === true) {
+            c.strokeStyle = "yellow";
+        }
+        else {
+            c.strokeStyle = "blue";
+        }
+
+        if (this.infected === true) {
+            c.fillStyle = "red";
+        }
+        else if (this.immune === true) {
+            c.fillStyle = "yellow";
+        }
+        else {
+            c.fillStyle = "blue";
+        }
+        c.stroke();
+        c.fill();
     }
-  };
-    
+};
 
-let circleAmount = 300;
+
+let survivalRate = 0.5;
+
+let circleAmount = 100;
 
 let circleArray = [];
 
 for (let i = 0; i < circleAmount; i++) {
     let radius = 6;
-    let x = Math.random() * (innerWidth - radius * 2) + radius;
-    let y = Math.random() * (innerHeight - radius * 2) + radius;
-    
-if (i !== 0){
-    for (let j = 0; j < circleArray.length; j++){
-        if (getDistance(x, y, circleArray[j].x, circleArray[j].y) - radius * 2 < 0){     
-         x = Math.random() * (innerWidth - radius * 2) + radius;
-         y = Math.random() * (innerHeight - radius * 2) + radius;
-         j = -1;
+    let x = Math.random() * (canvas.width - radius * 2) + radius;
+    let y = Math.random() * (canvas.height - radius * 2) + radius;
+
+    if (i !== 0) {
+        for (let j = 0; j < circleArray.length; j++) {
+            if (getDistance(x, y, circleArray[j].x, circleArray[j].y) - radius * 2 < 0) {
+                x = Math.random() * (canvas.width - radius * 2) + radius;
+                y = Math.random() * (canvas.height - radius * 2) + radius;
+                j = -1;
+            }
         }
     }
-}
+
     circleArray.push(new Circle(x, y, radius));
 }
 console.log("There are " + circleArray.length + " circles");
 
-function circlemove() { 
-    c.clearRect(0, 0, innerWidth, innerHeight);
-for (let i = 0; i < circleArray.length; i++) {
-  circleArray[i].update(circleArray); 
-}
+function circlemove() {
+    c.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < circleArray.length; i++) {
+        circleArray[i].update(circleArray);
+    }
     requestAnimationFrame(circlemove);
 }
 circlemove();
