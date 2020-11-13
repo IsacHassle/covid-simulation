@@ -6,70 +6,16 @@ canvas.height = window.innerHeight;
 
 let c = canvas.getContext("2d");
 
-
-function rotate(velocity, angle) {
-    const rotatedVelocities = {
-        x: velocity.x * Math.cos(angle) - velocity.y * Math.sin(angle),
-        y: velocity.x * Math.sin(angle) + velocity.y * Math.cos(angle)
-    };
-
-    return rotatedVelocities;
-}
-
-
-function resolveCollision(circle, otherCircle) {
-    const xVelocityDiff = circle.velocity.x - otherCircle.velocity.x;
-    const yVelocityDiff = circle.velocity.y - otherCircle.velocity.y;
-
-    const xDist = otherCircle.x - circle.x;
-    const yDist = otherCircle.y - circle.y;
-
-    // Prevent accidental overlap of circles
-    if (xVelocityDiff * xDist + yVelocityDiff * yDist >= 0) {
-
-        // Grab angle between the two colliding circles
-        const angle = -Math.atan2(otherCircle.y - circle.y, otherCircle.x - circle.x);
-
-        // Store mass in var for better readability in collision equation
-        const m1 = circle.mass;
-        const m2 = otherCircle.mass;
-
-        // Velocity before equation
-        const u1 = rotate(circle.velocity, angle);
-        const u2 = rotate(otherCircle.velocity, angle);
-
-        // Velocity after 1d collision equation
-        const v1 = { x: u1.x * (m1 - m2) / (m1 + m2) + u2.x * 2 * m2 / (m1 + m2), y: u1.y };
-        const v2 = { x: u2.x * (m1 - m2) / (m1 + m2) + u1.x * 2 * m2 / (m1 + m2), y: u2.y };
-
-        // Final velocity after rotating axis back to original location
-        const vFinal1 = rotate(v1, -angle);
-        const vFinal2 = rotate(v2, -angle);
-
-        // Swap circle velocities for realistic bounce effect
-        circle.velocity.x = vFinal1.x;
-        circle.velocity.y = vFinal1.y;
-
-        otherCircle.velocity.x = vFinal2.x;
-        otherCircle.velocity.y = vFinal2.y;
-    }
-}
-
-
-
-function getDistance(x1, y1, x2, y2) {
-    let xDistance = x2 - x1;
-    let yDistance = y2 - y1;
-
-    return Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2))
-}
-
 function Circle(x, y, radius) {
+    let timeUntilDeath = Math.random() * 10000;
+    let survivalRate = 0.2;
+    let deathRate = Math.random();
+    let speed = 5;
     this.x = x;
     this.y = y;
     this.velocity = {
-        x: ((Math.random() - 0.5) * 2.5),
-        y: ((Math.random() - 0.5) * 2.5)
+        x: ((Math.random() - 0.5) * speed),
+        y: ((Math.random() - 0.5) * speed)
     }
     this.radius = radius;
     this.mass = 1;
@@ -81,10 +27,9 @@ function Circle(x, y, radius) {
         this.infected = true;
         this.immune = false;
     }
-    let timeUntilDeath = Math.random() * 10000;
-   
+
     this.willDieAt = (this.infected === true && this.immune === false) ? new Date().getTime() + timeUntilDeath : new Date().getTime() + 10000000000;
-    this.sick = false;
+    this.dying = false;
 
 
     function infect(thisCircle, otherCircle) {
@@ -99,7 +44,8 @@ function Circle(x, y, radius) {
         }
     }
 
-    let deathRate = Math.random();
+    
+
     this.update = function (circleArray) {
         this.draw();
         // Collide detection
@@ -115,14 +61,13 @@ function Circle(x, y, radius) {
 
                 }
 
-
-
                 resolveCollision(this, circleArray[i]);
 
 
             }
-            // makes the circle change direction when in contact with wall
+            
         }
+        // makes the circle change direction when in contact with wall
         if (this.x + this.radius >= canvas.width || this.x - this.radius <= canvas.width - canvas.width) {
             this.velocity.x = -this.velocity.x;
         }
@@ -137,13 +82,13 @@ function Circle(x, y, radius) {
 
 
         if (this.willDieAt < new Date().getTime()) {
-            this.sick = true;
+            this.dying = true;
         }
-        if (this.sick && deathRate < survivalRate) {
+        if (this.dying && deathRate < survivalRate) {
             this.infected = false;
             this.immune = true;
         }
-        if (this.sick && deathRate > survivalRate) {
+        if (this.dying && deathRate > survivalRate) {
             this.velocity.x = 0;
             this.velocity.y = 0;
             this.x = canvas.width + 100;
@@ -168,7 +113,6 @@ function Circle(x, y, radius) {
         else {
             c.strokeStyle = "blue";
         }
-
         if (this.infected === true) {
             c.fillStyle = "red";
         }
@@ -181,12 +125,68 @@ function Circle(x, y, radius) {
         c.stroke();
         c.fill();
     }
+
+    function rotate(velocity, angle) {
+        const rotatedVelocities = {
+            x: velocity.x * Math.cos(angle) - velocity.y * Math.sin(angle),
+            y: velocity.x * Math.sin(angle) + velocity.y * Math.cos(angle)
+        };
+    
+        return rotatedVelocities;
+    }
+    
+    
+    function resolveCollision(circle, otherCircle) {
+        const xVelocityDiff = circle.velocity.x - otherCircle.velocity.x;
+        const yVelocityDiff = circle.velocity.y - otherCircle.velocity.y;
+    
+        const xDist = otherCircle.x - circle.x;
+        const yDist = otherCircle.y - circle.y;
+    
+        // Prevent accidental overlap of circles
+        if (xVelocityDiff * xDist + yVelocityDiff * yDist >= 0) {
+    
+            // Grab angle between the two colliding circles
+            const angle = -Math.atan2(otherCircle.y - circle.y, otherCircle.x - circle.x);
+    
+            // Store mass in var for better readability in collision equation
+            const m1 = circle.mass;
+            const m2 = otherCircle.mass;
+    
+            // Velocity before equation
+            const u1 = rotate(circle.velocity, angle);
+            const u2 = rotate(otherCircle.velocity, angle);
+    
+            // Velocity after 1d collision equation
+            const v1 = { x: u1.x * (m1 - m2) / (m1 + m2) + u2.x * 2 * m2 / (m1 + m2), y: u1.y };
+            const v2 = { x: u2.x * (m1 - m2) / (m1 + m2) + u1.x * 2 * m2 / (m1 + m2), y: u2.y };
+    
+            // Final velocity after rotating axis back to original location
+            const vFinal1 = rotate(v1, -angle);
+            const vFinal2 = rotate(v2, -angle);
+    
+            // Swap circle velocities for realistic bounce effect
+            circle.velocity.x = vFinal1.x;
+            circle.velocity.y = vFinal1.y;
+    
+            otherCircle.velocity.x = vFinal2.x;
+            otherCircle.velocity.y = vFinal2.y;
+        }
+    }
+    
 };
 
 
-let survivalRate = 0.5;
+function getDistance(x1, y1, x2, y2) {
+    let xDistance = x2 - x1;
+    let yDistance = y2 - y1;
+  
+    return Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2))
+}
 
-let circleAmount = 100;
+
+
+let circleAmount = 150;
 
 let circleArray = [];
 
