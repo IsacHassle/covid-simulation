@@ -1,14 +1,44 @@
 let canvas = document.querySelector("canvas");
 
 
-canvas.width = window.innerWidth / 2;
+canvas.width = window.innerWidth*0.5;
 canvas.height = window.innerHeight;
 
 let c = canvas.getContext("2d");
 
+
+
+     // creates slider for survival rate   
+let slider = document.getElementById("myRange");
+let output = document.getElementById("Survival Percentage");
+output.innerHTML = slider.value;
+
+slider.oninput = function() {
+  output.innerHTML = this.value;
+}
+let survivalRateSlider = 0.5;
+slider.addEventListener("input", (e) => {
+    survivalRateSlider = e.target.value;
+    console.log(e.target.value);
+    })
+
+
+    
+     
+function r(){
+    let btn="t"
+    let btn1 = document.getElementById("startButton");
+    if(btn=="t"){
+
+    }
+ 
+    
+
+
+
 function Circle(x, y, radius) {
     let timeUntilDeath = Math.random() * 10000;
-    let survivalRate = 0.2;
+    let survivalRate = survivalRateSlider;
     let deathRate = Math.random();
     let speed = 5;
     this.x = x;
@@ -19,15 +49,15 @@ function Circle(x, y, radius) {
     }
     this.radius = radius;
     this.mass = 1;
-   if(Math.random() >= 0.03){
+    if (Math.random() >= 0.03) {
         this.infected = false;
         this.immune = (Math.random() >= 0.01 ? false : true);
-    } 
-    else{
+    }
+    else {
         this.infected = true;
         this.immune = false;
     }
-
+    console.log(survivalRate);
     this.willDieAt = (this.infected === true && this.immune === false) ? new Date().getTime() + timeUntilDeath : new Date().getTime() + 10000000000;
     this.dying = false;
 
@@ -36,7 +66,7 @@ function Circle(x, y, radius) {
         if (thisCircle.infected === true && otherCircle.immune === false && otherCircle.infected === false) {
             otherCircle.infected = true;
             otherCircle.willDieAt = new Date().getTime() + timeUntilDeath;
-    
+
         }
         if (otherCircle.infected === true && thisCircle.immune === false && thisCircle.infected === false) {
             thisCircle.infected = true;
@@ -44,7 +74,7 @@ function Circle(x, y, radius) {
         }
     }
 
-    
+
 
     this.update = function (circleArray) {
         this.draw();
@@ -65,7 +95,7 @@ function Circle(x, y, radius) {
 
 
             }
-            
+
         }
         // makes the circle change direction when in contact with wall
         if (this.x + this.radius >= canvas.width || this.x - this.radius <= canvas.width - canvas.width) {
@@ -95,7 +125,8 @@ function Circle(x, y, radius) {
             this.y = canvas.length + 100;
         }
 
-        
+
+
     };
 
 
@@ -108,7 +139,7 @@ function Circle(x, y, radius) {
             c.strokeStyle = "red";
         }
         else if (this.immune === true) {
-            c.strokeStyle = "yellow";
+            c.strokeStyle = "olive";
         }
         else {
             c.strokeStyle = "blue";
@@ -117,7 +148,7 @@ function Circle(x, y, radius) {
             c.fillStyle = "red";
         }
         else if (this.immune === true) {
-            c.fillStyle = "yellow";
+            c.fillStyle = "olive";
         }
         else {
             c.fillStyle = "blue";
@@ -131,56 +162,56 @@ function Circle(x, y, radius) {
             x: velocity.x * Math.cos(angle) - velocity.y * Math.sin(angle),
             y: velocity.x * Math.sin(angle) + velocity.y * Math.cos(angle)
         };
-    
+
         return rotatedVelocities;
     }
-    
-    
+
+
     function resolveCollision(circle, otherCircle) {
         const xVelocityDiff = circle.velocity.x - otherCircle.velocity.x;
         const yVelocityDiff = circle.velocity.y - otherCircle.velocity.y;
-    
+
         const xDist = otherCircle.x - circle.x;
         const yDist = otherCircle.y - circle.y;
-    
+
         // Prevent accidental overlap of circles
         if (xVelocityDiff * xDist + yVelocityDiff * yDist >= 0) {
-    
+
             // Grab angle between the two colliding circles
             const angle = -Math.atan2(otherCircle.y - circle.y, otherCircle.x - circle.x);
-    
+
             // Store mass in var for better readability in collision equation
             const m1 = circle.mass;
             const m2 = otherCircle.mass;
-    
+
             // Velocity before equation
             const u1 = rotate(circle.velocity, angle);
             const u2 = rotate(otherCircle.velocity, angle);
-    
+
             // Velocity after 1d collision equation
             const v1 = { x: u1.x * (m1 - m2) / (m1 + m2) + u2.x * 2 * m2 / (m1 + m2), y: u1.y };
             const v2 = { x: u2.x * (m1 - m2) / (m1 + m2) + u1.x * 2 * m2 / (m1 + m2), y: u2.y };
-    
+
             // Final velocity after rotating axis back to original location
             const vFinal1 = rotate(v1, -angle);
             const vFinal2 = rotate(v2, -angle);
-    
+
             // Swap circle velocities for realistic bounce effect
             circle.velocity.x = vFinal1.x;
             circle.velocity.y = vFinal1.y;
-    
+
             otherCircle.velocity.x = vFinal2.x;
             otherCircle.velocity.y = vFinal2.y;
         }
     }
-    
+
 };
 
 
 function getDistance(x1, y1, x2, y2) {
     let xDistance = x2 - x1;
     let yDistance = y2 - y1;
-  
+
     return Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2))
 }
 
@@ -218,7 +249,7 @@ function circlemove() {
 }
 circlemove();
 
-
+}
 
 
 

@@ -2,22 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Isac Testsida</title>
-    <style type="text/**">
-
-canvas { 
-    border:5px solid red;
-
-  
-    }
-    body {
-        margin: 0;
-    }
+    <title>Simulation</title>
+    <style>
     </style>
-
 </head>
 <body>
+    
+<div class="container">
+    <!-- Draws a range slider -->
+    <input type="range" min="0" max="1" value="0.5" step="0.1" class="slider" id="myRange"/>
+    <p>Survival Rate: <span id="Survival Percentage"></span></p>
+
+    <!-- Draws start button -->
+    <input type="button" value="Start Simulation" id="startButton" onclick="r();"></input>
+
+</div>
+
     <canvas></canvas>
-    <script src="canvas.js"></script> 
+    <script src="simulation.js"></script> 
 </body>
 </html>
