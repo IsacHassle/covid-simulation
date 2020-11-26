@@ -1,41 +1,51 @@
 let canvas = document.querySelector("canvas");
 
 
-canvas.width = window.innerWidth*0.5;
-canvas.height = window.innerHeight;
+canvas.width = window.innerWidth*0.7;
+canvas.height = window.innerHeight*0.7;
 
 let c = canvas.getContext("2d");
 
 
 
      // creates slider for survival rate   
-let slider = document.getElementById("myRange");
-let output = document.getElementById("Survival Percentage");
-output.innerHTML = slider.value;
+let survivalSlider = document.getElementById("mySurvivalRate");
+let survivalOutput = document.getElementById("Survival Percentage");
+survivalOutput.innerHTML = survivalSlider.value;
 
-slider.oninput = function() {
-  output.innerHTML = this.value;
+survivalSlider.oninput = function() {
+  survivalOutput.innerHTML = this.value;
 }
 let survivalRateSlider = 0.5;
-slider.addEventListener("input", (e) => {
+survivalSlider.addEventListener("input", (e) => {
     survivalRateSlider = e.target.value;
-    console.log(e.target.value);
     })
 
 
+    // creates slider for nummber of circles
+let amountSlider = document.getElementById("myAmount");
+let amountOutput = document.getElementById("Amount Of Circles");
+    amountOutput.innerHTML = amountSlider.value;
     
-     
+amountSlider.oninput = function() {
+    amountOutput.innerHTML = this.value;
+}
+let amountRateSlider = 100;
+amountSlider.addEventListener("input", (s) => {
+    amountRateSlider = s.target.value;
+    })
+    
+
+    // creates button to start the simulation 
 function r(){
     let btn="t"
     let btn1 = document.getElementById("startButton");
-    if(btn=="t"){
-
-    }
+    if(btn=="t"){}
  
+
+
+
     
-
-
-
 function Circle(x, y, radius) {
     let timeUntilDeath = Math.random() * 10000;
     let survivalRate = survivalRateSlider;
@@ -217,7 +227,7 @@ function getDistance(x1, y1, x2, y2) {
 
 
 
-let circleAmount = 150;
+let circleAmount = amountRateSlider;
 
 let circleArray = [];
 
