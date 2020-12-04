@@ -7,7 +7,6 @@ canvas.height = window.innerHeight*0.7;
 let c = canvas.getContext("2d");
 
 
-
      // creates slider for survival rate   
 let survivalSlider = document.getElementById("mySurvivalRate");
 let survivalOutput = document.getElementById("Survival Percentage");
@@ -36,12 +35,27 @@ amountSlider.addEventListener("input", (s) => {
     })
     
 
-    // creates button to start the simulation 
+
+
+// creates slider for velocity
+let velocitySlider = document.getElementById("myVelocity");
+let velocityOutput = document.getElementById("Average Velocity");
+    velocityOutput.innerHTML = velocitySlider.value;
+        
+velocitySlider.oninput = function() {
+    velocityOutput.innerHTML = this.value;
+}
+let velocityRateSlider = 5;
+velocitySlider.addEventListener("input", (t) => {
+    velocityRateSlider = t.target.value;
+    })
+        
+
 function r(){
     let btn="t"
     let btn1 = document.getElementById("startButton");
     if(btn=="t"){}
- 
+
 
 
 
@@ -50,7 +64,7 @@ function Circle(x, y, radius) {
     let timeUntilDeath = Math.random() * 10000;
     let survivalRate = survivalRateSlider;
     let deathRate = Math.random();
-    let speed = 5;
+    let speed = velocityRateSlider;
     this.x = x;
     this.y = y;
     this.velocity = {
@@ -145,6 +159,9 @@ function Circle(x, y, radius) {
         c.beginPath();
         c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         // changes the color based on if the circle is infected or not
+        c.strokeStyle = "black";
+        c.strokeRect(0, 0, canvas.width, canvas.height);
+
         if (this.infected === true) {
             c.strokeStyle = "red";
         }
@@ -163,9 +180,12 @@ function Circle(x, y, radius) {
         else {
             c.fillStyle = "blue";
         }
+
         c.stroke();
         c.fill();
+        
     }
+
 
     function rotate(velocity, angle) {
         const rotatedVelocities = {
